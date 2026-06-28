@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Bathhouse — Interactive Business Plan</title>
+<style>
+  :root{
+    --bg:#f4efe8; --panel:#fbf8f3; --ink:#2f2a24; --muted:#7c7065;
+    --line:#e3d9cc; --wood:#a8744f; --wood-dk:#8a5d3d; --sage:#7f8c6e;
+    --terra:#c0613f; --cold:#5b8fa3; --warm:#d99a5b; --gold:#b78a3e;
+    --good:#4f7a52; --bad:#b4543a; --shadow:0 1px 3px rgba(60,45,30,.08),0 8px 24px rgba(60,45,30,.06);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  h1,h2,h3{font-weight:600;letter-spacing:-.01em;line-height:1.2}
+  h2{font-size:1.7rem;margin:0 0 6px}
+  h3{font-size:1.15rem;margin:0 0 10px}
+  p{margin:0 0 14px}
+  a{color:var(--wood-dk)}
+  .eyebrow{font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--wood);font-weight:700;margin-bottom:8px}
+
+  /* hero */
+  header.hero{background:
+      radial-gradient(120% 90% at 80% -10%, rgba(217,154,91,.25), transparent 55%),
+      radial-gradient(100% 80% at 0% 0%, rgba(91,143,163,.18), transparent 50%),
+      linear-gradient(160deg,#2f2a24,#3c342b 60%,#4a3c2e);
+    color:#f6efe5;padding:64px 0 56px;position:relative;overflow:hidden}
+  header.hero .wrap{position:relative;z-index:2}
+  header.hero h1{font-size:2.9rem;margin:0 0 14px;color:#fbf3e7}
+  header.hero p.sub{font-size:1.15rem;color:#e6d9c6;max-width:640px;margin:0}
+  .badges{margin-top:26px;display:flex;flex-wrap:wrap;gap:10px}
+  .badge{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);
+    padding:7px 14px;border-radius:999px;font-size:.82rem;color:#f0e6d6}
+  .steam{position:absolute;inset:0;opacity:.5;z-index:1;
+    background:radial-gradient(60% 40% at 50% 110%, rgba(255,255,255,.12), transparent 70%)}
+
+  /* nav */
+  nav.toc{position:sticky;top:0;z-index:20;background:rgba(244,239,232,.92);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  nav.toc .wrap{display:flex;gap:6px;overflow-x:auto;padding:10px 24px}
+  nav.toc a{white-space:nowrap;font-size:.85rem;text-decoration:none;color:var(--muted);
+    padding:7px 13px;border-radius:8px;font-weight:500}
+  nav.toc a:hover{background:#ece3d6;color:var(--ink)}
+
+  section{padding:46px 0;border-bottom:1px solid var(--line)}
+  .lead{font-size:1.12rem;color:#4b433a;max-width:720px}
+
+  .grid{display:grid;gap:18px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:820px){.g2,.g3,.g4{grid-template-columns:1fr}header.hero h1{font-size:2.1rem}}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:20px;box-shadow:var(--shadow)}
+  .card h3{display:flex;align-items:center;gap:9px}
+  .pill{display:inline-block;font-size:.7rem;font-weight:700;letter-spacing:.06em;
+    text-transform:uppercase;padding:3px 9px;border-radius:999px;background:#ece2d3;color:var(--wood-dk)}
+
+  .stat{font-size:1.9rem;font-weight:700;letter-spacing:-.02em}
+  .stat.sm{font-size:1.4rem}
+  .statlbl{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+
+  /* circuit diagram */
+  .circuit{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;margin:8px 0}
+  .node{display:flex;flex-direction:column;align-items:center;gap:6px;width:104px;text-align:center}
+  .disc{width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:1.5rem;border:2px solid;background:#fff}
+  .disc.hot{border-color:var(--terra);color:var(--terra);background:#fbeee7}
+  .disc.cold{border-color:var(--cold);color:var(--cold);background:#e9f1f4}
+  .disc.warm{border-color:var(--warm);color:var(--gold);background:#fbf2e3}
+  .disc.rest{border-color:var(--sage);color:var(--sage);background:#eef1e8}
+  .node small{font-size:.74rem;color:var(--muted);line-height:1.3}
+  .node b{font-size:.92rem}
+  .arrow{color:var(--wood);font-size:1.3rem;opacity:.6}
+  @media(max-width:820px){.arrow{display:none}.node{width:46%}}
+
+  /* model */
+  .modelgrid{display:grid;grid-template-columns:1.1fr .9fr;gap:20px}
+  @media(max-width:900px){.modelgrid{grid-template-columns:1fr}}
+  .inputs{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:18px;box-shadow:var(--shadow)}
+  .igroup{margin-bottom:18px}
+  .igroup>summary{cursor:pointer;font-weight:600;font-size:.98rem;padding:8px 0;
+    list-style:none;display:flex;align-items:center;gap:8px;color:var(--ink)}
+  .igroup>summary::-webkit-details-marker{display:none}
+  .igroup>summary::before{content:"▸";color:var(--wood);transition:transform .15s}
+  .igroup[open]>summary::before{transform:rotate(90deg)}
+  .irow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:5px 0}
+  .irow label{font-size:.86rem;color:#4b433a;flex:1}
+  .irow .unit{font-size:.72rem;color:var(--muted);margin-left:4px}
+  .irow input{width:104px;text-align:right;font-size:.9rem;padding:6px 9px;
+    border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font-variant-numeric:tabular-nums}
+  .irow input:focus{outline:2px solid var(--warm);outline-offset:0;border-color:var(--warm)}
+
+  .results{display:flex;flex-direction:column;gap:14px}
+  .kpis{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:var(--shadow)}
+  .kpi .v{font-size:1.5rem;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .kpi .l{font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+  .v.good{color:var(--good)} .v.bad{color:var(--bad)}
+
+  .alert{border-radius:12px;padding:13px 15px;font-size:.9rem;border:1px solid}
+  .alert.warn{background:#fbeee7;border-color:#e8c3ad;color:#8a3d22}
+  .alert.ok{background:#eef3ea;border-color:#cbdcc0;color:#3c5a3e}
+
+  table.mini{width:100%;border-collapse:collapse;font-size:.86rem}
+  table.mini td{padding:5px 0;border-bottom:1px solid var(--line)}
+  table.mini td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+  table.mini tr:last-child td{border-bottom:none;font-weight:700}
+
+  .chartbox{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow)}
+  .chartbox h3{margin-bottom:6px}
+  .svgchart svg{width:100%;height:auto;display:block}
+  .donutwrap{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .donutwrap svg{width:170px;flex:0 0 170px}
+  .legend{display:flex;flex-direction:column;gap:5px;font-size:.82rem;min-width:140px;flex:1}
+  .legend .li{display:flex;align-items:center;gap:8px}
+  .legend .sw{width:11px;height:11px;border-radius:3px;flex:0 0 11px}
+  .legend .lname{color:#4b433a;flex:1}
+  .legend .lval{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:600}
+  @media(max-width:520px){.donutwrap svg{width:130px;flex-basis:130px}}
+
+  .note{font-size:.82rem;color:var(--muted)}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .btn{font-size:.82rem;padding:8px 14px;border-radius:9px;border:1px solid var(--line);
+    background:#fff;color:var(--ink);cursor:pointer;font-weight:500}
+  .btn:hover{background:#f0e7d9}
+  .btn.primary{background:var(--wood);color:#fff;border-color:var(--wood)}
+  .btn.primary:hover{background:var(--wood-dk)}
+
+  ul.clean{list-style:none;padding:0;margin:0}
+  ul.clean li{padding:7px 0 7px 26px;position:relative;border-bottom:1px solid var(--line);font-size:.92rem}
+  ul.clean li:last-child{border-bottom:none}
+  ul.clean li::before{content:"";position:absolute;left:4px;top:14px;width:8px;height:8px;
+    border-radius:50%;background:var(--wood)}
+
+  .timeline{position:relative;margin-left:8px;padding-left:24px;border-left:2px solid var(--line)}
+  .tphase{position:relative;padding:0 0 22px}
+  .tphase::before{content:"";position:absolute;left:-31px;top:3px;width:14px;height:14px;border-radius:50%;
+    background:var(--panel);border:3px solid var(--wood)}
+  .tphase b{font-size:1.02rem}
+  .tphase .when{font-size:.76rem;color:var(--wood);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+
+  footer{padding:30px 0 60px;color:var(--muted);font-size:.85rem}
+  .draftmark{display:inline-block;background:#ece2d3;color:var(--wood-dk);font-size:.72rem;
+    padding:3px 10px;border-radius:999px;font-weight:700;letter-spacing:.05em}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="steam"></div>
+  <div class="wrap">
+    <div class="eyebrow" style="color:#e9c79a">Wellness Bathhouse · Vancouver, WA</div>
+    <h1>The Bathhouse</h1>
+    <p class="sub">A small, social thermal bathhouse in uptown Vancouver — sauna, steam room, hot/cold/temperate tubs, and a warm communal lounge. Phase one of a larger wellness vision. <em>A place to sweat, plunge, and belong.</em></p>
+    <div class="badges">
+      <span class="badge">~2,200 sq ft</span>
+      <span class="badge">Hybrid: memberships + day passes</span>
+      <span class="badge">Open social bathing · co-ed</span>
+      <span class="badge">Owner-operated · self-funded</span>
+      <span class="badge">Open in 6–12 months</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="wrap">
+    <a href="#concept">Concept</a>
+    <a href="#experience">The Experience</a>
+    <a href="#market">Market</a>
+    <a href="#membership">Membership</a>
+    <a href="#model">Financial Model</a>
+    <a href="#ramp">Capacity &amp; Ramp</a>
+    <a href="#startup">Startup Costs</a>
+    <a href="#roadmap">Roadmap</a>
+    <a href="#risks">Risks &amp; Open Qs</a>
+  </div>
+</nav>
+
+<!-- CONCEPT -->
+<section id="concept">
+  <div class="wrap">
+    <div class="eyebrow">01 · The Concept</div>
+    <h2>A wellness "third place," not just a spa</h2>
+    <p class="lead">The hook isn't biohacking or luxury pampering — it's belonging. The Bathhouse is built around an authentic Nordic-style heat-and-cold circuit, but its real product is connection: a warm, design-forward room where regulars run into each other, slow down, and feel part of something. Swimwear-on, co-ed, come-and-go.</p>
+
+    <div class="grid g3" style="margin-top:22px">
+      <div class="card">
+        <h3><span class="pill">Why</span></h3>
+        <p>People are starved for unstructured, screen-free social spaces that aren't a bar. Sauna culture delivers exactly that — and recovery is having a genuine cultural moment.</p>
+      </div>
+      <div class="card">
+        <h3><span class="pill">What</span></h3>
+        <p>1 communal sauna, 1 steam room, hot/cold/temperate tubs, showers, and a communal lounge serving tea, coffee, kombucha, and light snacks. No alcohol, no gym — yet.</p>
+      </div>
+      <div class="card">
+        <h3><span class="pill">Who</span></h3>
+        <p>Locals seeking a regular ritual and a community — wellness-curious professionals, couples, and friends, ages ~25–55, in and around downtown Vancouver.</p>
+      </div>
+    </div>
+
+    <div class="grid g2" style="margin-top:18px">
+      <div class="card">
+        <h3>What makes it stand out</h3>
+        <ul class="clean">
+          <li><b>Community-first.</b> Programming, regulars, and a lounge designed for lingering — not a clinical in-and-out.</li>
+          <li><b>Authentic thermal circuit.</b> A real hot→cold→rest loop done properly, not an infrared box bolted onto a gym.</li>
+          <li><b>Approachable, not intimidating.</b> Swimwear-on and co-ed lowers the barrier for first-timers.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>The bigger vision (Phase 2+)</h3>
+        <p>This starter location proves the concept and the community. The full vision layers on a <b>gym, more soaking, a full juice bar, and expanded social space</b> — either by expanding here or opening a flagship second site once the model is proven.</p>
+        <p class="note">We're deliberately starting lean to validate demand and protect your capital.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="wrap">
+    <div class="eyebrow">02 · The Experience</div>
+    <h2>The thermal circuit</h2>
+    <p class="lead">Guests move through a loop — heat, cold, rest, repeat — then spend time in the lounge. The whole space is designed so the social room is the heart, with the wet circuit wrapped around it.</p>
+
+    <div class="card" style="margin-top:20px">
+      <div class="circuit">
+        <div class="node"><div class="disc hot">🔥</div><b>Sauna</b><small>communal dry heat, 8–12 min</small></div>
+        <div class="arrow">→</div>
+        <div class="node"><div class="disc hot">💨</div><b>Steam Room</b><small>warm humid heat</small></div>
+        <div class="arrow">→</div>
+        <div class="node"><div class="disc cold">❄️</div><b>Cold Tub</b><small>10–12°C, 1–3 min</small></div>
+        <div class="arrow">→</div>
+        <div class="node"><div class="disc warm">♨️</div><b>Hot Tub</b><small>soak &amp; unwind</small></div>
+        <div class="arrow">→</div>
+        <div class="node"><div class="disc rest">🌊</div><b>Temperate Tub</b><small>neutral reset</small></div>
+        <div class="arrow">→</div>
+        <div class="node"><div class="disc rest">🍵</div><b>Lounge</b><small>tea · kombucha · snacks</small></div>
+      </div>
+      <p class="note" style="margin-top:10px;text-align:center">Lean launch opens with the core circuit — <b>sauna + hot &amp; cold tubs + lounge</b> (a complete contrast experience). The <b>steam room</b> and <b>temperate tub</b> are added in Phase 1b from cash flow, within year one.</p>
+    </div>
+
+    <div class="grid g3" style="margin-top:18px">
+      <div class="card"><div class="statlbl">Typical visit</div><div class="stat sm">75–120 min</div><p class="note" style="margin-top:6px">Long enough to relax and socialize; short enough to turn capacity.</p></div>
+      <div class="card"><div class="statlbl">Format</div><div class="stat sm">Open social</div><p class="note" style="margin-top:6px">Come-and-go access, co-ed, swimwear required. No reservations needed.</p></div>
+      <div class="card"><div class="statlbl">The lounge</div><div class="stat sm">The anchor</div><p class="note" style="margin-top:6px">Where community forms — the reason people come back weekly.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- MARKET -->
+<section id="market">
+  <div class="wrap">
+    <div class="eyebrow">03 · Market &amp; Location</div>
+    <h2>Uptown / downtown Vancouver, WA</h2>
+    <p class="lead">Vancouver's urban core is growing, walkable, and underserved for social wellness — most comparable bathhouses are across the river in Portland. Being the first true social bathhouse on the WA side is a real positioning advantage.</p>
+
+    <div class="grid g4" style="margin-top:20px">
+      <div class="card"><div class="statlbl">Retail lease (downtown)</div><div class="stat sm">$20–38</div><p class="note">per sq ft / yr, NNN typical</p></div>
+      <div class="card"><div class="statlbl">Regional day pass</div><div class="stat sm">$32–40</div><p class="note">PNW sauna/plunge benchmarks</p></div>
+      <div class="card"><div class="statlbl">Direct WA-side rivals</div><div class="stat sm">Few</div><p class="note">most are in Portland, OR</p></div>
+      <div class="card"><div class="statlbl">No sales tax (WA)</div><div class="stat sm">Edge</div><p class="note">draws Oregon visitors</p></div>
+    </div>
+
+    <div class="grid g2" style="margin-top:18px">
+      <div class="card">
+        <h3>Tailwinds</h3>
+        <ul class="clean">
+          <li>Sauna &amp; cold-therapy demand is rising fast nationally.</li>
+          <li>Downtown Vancouver waterfront development is pulling in residents and foot traffic.</li>
+          <li>Strong "third place" hunger post-pandemic, especially among 25–45s.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Headwinds to plan for</h3>
+        <ul class="clean">
+          <li>Portland competitors (Knot Springs, etc.) set high expectations.</li>
+          <li>Wet buildouts are capital-intensive — the core tension in this plan.</li>
+          <li>Education needed: many locals haven't done a contrast circuit before.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note" style="margin-top:14px">Benchmarks are starting estimates from mid-2026 market research, not quotes — every number in the model below is yours to edit.</p>
+  </div>
+</section>
+
+<!-- MEMBERSHIP -->
+<section id="membership">
+  <div class="wrap">
+    <div class="eyebrow">04 · Membership &amp; Pricing</div>
+    <h2>Two tiers, all-inclusive, built for regulars</h2>
+    <p class="lead">Membership is the financial backbone — recurring, predictable revenue and the engine of community. The structure is deliberately simple: one individual membership with two access levels (Anytime and Off-Peak), everything included. No towel fees, no add-on nickel-and-diming — that protects the "third place" feel.</p>
+
+    <div class="grid g2" style="margin-top:20px">
+      <div class="card">
+        <h3><span class="pill">Anytime</span> All-access</h3>
+        <div class="stat" style="color:var(--terra)">$139<span style="font-size:1rem;color:var(--muted)">/mo</span></div>
+        <ul class="clean" style="margin-top:10px">
+          <li>Unlimited access, all open hours including evenings &amp; weekends</li>
+          <li>Tea, coffee, kombucha &amp; light snacks included</li>
+          <li>Towel &amp; locker included</li>
+          <li>Best for evening &amp; weekend regulars</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3><span class="pill">Off-Peak</span> Daytime</h3>
+        <div class="stat" style="color:var(--cold)">$99<span style="font-size:1rem;color:var(--muted)">/mo</span></div>
+        <ul class="clean" style="margin-top:10px">
+          <li>Unlimited access during off-peak hours (e.g. weekday daytime)</li>
+          <li>Same all-inclusive perks: tea, snacks, towel, locker</li>
+          <li>Fills slow hours; protects evening capacity</li>
+          <li>Great for remote workers, retirees, flexible schedules</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid g2" style="margin-top:18px">
+      <div class="card">
+        <h3>Why these prices</h3>
+        <p>You sit intentionally <b>below Portland's premium players</b> (Knot Springs $200–400, Othership ~$333) and <b>above infrared-only studios</b> ($40–50). $139 anytime matches mid-market full-circuit comps (ROK $150, Red Rock $125) while the $99 off-peak tier widens the funnel and monetizes dead daytime hours.</p>
+        <p class="note">These are starting points — change them in the model below and watch revenue, profit, and break-even move. Try $125/$89 (accessible) or $159/$119 (premium-approachable) to compare.</p>
+      </div>
+      <div class="card">
+        <h3>Comparable bathhouse pricing</h3>
+        <table class="mini">
+          <tr><td>Knot Springs (Portland)</td><td>$200–400/mo</td></tr>
+          <tr><td>Othership (NYC)</td><td>~$333/mo</td></tr>
+          <tr><td>ROK Spas (Denver)</td><td>$150/mo</td></tr>
+          <tr><td>Red Rock Sauna</td><td>$125/mo</td></tr>
+          <tr><td>Embrace North (infrared)</td><td>$40–50/mo</td></tr>
+          <tr><td><b>The Bathhouse (proposed)</b></td><td><b>$99–139/mo</b></td></tr>
+        </table>
+      </div>
+    </div>
+    <p class="note" style="margin-top:14px">Day passes ($38 default) are priced so anyone visiting more than ~3–4 times a month comes out ahead as a member — the funnel always points toward subscription. Founding-member presales and duo rates are parked for now — easy to add once the core pricing is proven.</p>
+  </div>
+</section>
+
+<!-- FINANCIAL MODEL -->
+<section id="model">
+  <div class="wrap">
+    <div class="eyebrow">05 · Interactive Financial Model</div>
+    <h2>Change a number, watch the plan respond</h2>
+    <p class="lead">Every input below is editable. Adjust your space, pricing, members, and costs — the KPIs, charts, and break-even update instantly. Defaults are research-grounded starting points, deliberately honest about the budget tension.</p>
+
+    <div class="toolbar">
+      <button class="btn" id="resetBtn">↺ Reset to defaults</button>
+      <span class="note" id="saveNote" style="align-self:center">Your edits save automatically in this browser.</span>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h3>Cost assumptions are now grounded in local Clark County data</h3>
+      <p class="note" style="margin:0">Payroll is built bottom-up: ~150 staffed hrs/week (1–2 attendants flexed to demand) at $20/hr — above WA's 2026 minimum of $17.13 — plus a 15% payroll-tax &amp; benefits load, with $0 owner salary for now. Electricity reflects Clark Public Utilities commercial rates (~$0.083/kWh + demand charges); water/sewer reflects City of Vancouver consumption rates plus the 28.9% city utility tax; insurance assumes a wet-facility policy (~$9k/yr). Every figure is editable above — change a wage or add your own salary and watch break-even move.</p>
+    </div>
+
+    <div class="modelgrid" style="margin-top:18px">
+      <!-- INPUTS -->
+      <div class="inputs">
+        <details class="igroup" open>
+          <summary>🏠 Space &amp; rent</summary>
+          <div class="irow"><label>Size <span class="unit">sq ft</span></label><input data-k="sqft" type="number"></div>
+          <div class="irow"><label>Rent (gross) <span class="unit">$/sqft/yr</span></label><input data-k="rentPsf" type="number"></div>
+        </details>
+
+        <details class="igroup">
+          <summary>🔨 Startup — buildout &amp; equipment</summary>
+          <div class="irow"><label>Leasehold buildout <span class="unit">$/sqft</span></label><input data-k="buildPsf" type="number"></div>
+          <div class="irow"><label>Communal sauna <span class="unit">$</span></label><input data-k="saunaCost" type="number"></div>
+          <div class="irow"><label>Steam room <span class="unit">$</span></label><input data-k="steamCost" type="number"></div>
+          <div class="irow"><label>Hot tub <span class="unit">$</span></label><input data-k="hotCost" type="number"></div>
+          <div class="irow"><label>Cold tub <span class="unit">$</span></label><input data-k="coldCost" type="number"></div>
+          <div class="irow"><label>Temperate tub <span class="unit">$</span></label><input data-k="tempCost" type="number"></div>
+          <div class="irow"><label>Lockers / showers / FF&amp;E <span class="unit">$</span></label><input data-k="ffe" type="number"></div>
+          <div class="irow"><label>Lounge &amp; F&amp;B build <span class="unit">$</span></label><input data-k="lounge" type="number"></div>
+          <div class="irow"><label>Permits, design, fees <span class="unit">$</span></label><input data-k="permits" type="number"></div>
+          <div class="irow"><label>Branding &amp; pre-open mktg <span class="unit">$</span></label><input data-k="preopen" type="number"></div>
+          <div class="irow"><label>Contingency / working capital <span class="unit">$</span></label><input data-k="contingency" type="number"></div>
+        </details>
+
+        <details class="igroup">
+          <summary>💧 Revenue — capacity &amp; pricing</summary>
+          <div class="irow"><label>Day pass price <span class="unit">$</span></label><input data-k="dayPrice" type="number"></div>
+          <div class="irow"><label>Day passes / day <span class="unit">avg</span></label><input data-k="dayPerDay" type="number"></div>
+          <div class="irow"><label>Open days / month</label><input data-k="daysOpen" type="number"></div>
+          <div class="irow"><label>Anytime price <span class="unit">$/mo</span></label><input data-k="peakPrice" type="number"></div>
+          <div class="irow"><label>Anytime members <span class="unit"># mature</span></label><input data-k="peakQty" type="number"></div>
+          <div class="irow"><label>Off-peak price <span class="unit">$/mo</span></label><input data-k="offPrice" type="number"></div>
+          <div class="irow"><label>Off-peak members <span class="unit"># mature</span></label><input data-k="offQty" type="number"></div>
+        </details>
+
+        <details class="igroup">
+          <summary>📈 Member ramp</summary>
+          <div class="irow"><label>Members at open <span class="unit">presale #</span></label><input data-k="startMembers" type="number"></div>
+          <div class="irow"><label>Months to reach maturity</label><input data-k="rampMonths" type="number"></div>
+        </details>
+
+        <details class="igroup">
+          <summary>👥 Staffing &amp; payroll</summary>
+          <div class="irow"><label>Staffed hours / week <span class="unit">all staff</span></label><input data-k="staffHrsWeek" type="number"></div>
+          <div class="irow"><label>Avg wage <span class="unit">$/hr</span></label><input data-k="wage" type="number"></div>
+          <div class="irow"><label>Payroll tax + benefits load <span class="unit">%</span></label><input data-k="payrollLoad" type="number"></div>
+          <div class="irow"><label>Owner salary <span class="unit">$/yr</span></label><input data-k="ownerSalary" type="number"></div>
+        </details>
+
+        <details class="igroup">
+          <summary>📉 Other operating costs <span class="unit">monthly</span></summary>
+          <div class="irow"><label>Electricity <span class="unit">$/mo</span></label><input data-k="elec" type="number"></div>
+          <div class="irow"><label>Natural gas <span class="unit">$/mo</span></label><input data-k="gas" type="number"></div>
+          <div class="irow"><label>Water / sewer / stormwater <span class="unit">$/mo</span></label><input data-k="water" type="number"></div>
+          <div class="irow"><label>Laundry, cleaning &amp; supplies <span class="unit">$/mo</span></label><input data-k="laundry" type="number"></div>
+          <div class="irow"><label>Tea &amp; snacks (incl. w/ admission) <span class="unit">$/mo</span></label><input data-k="fnbCogs" type="number"></div>
+          <div class="irow"><label>Insurance <span class="unit">$/mo</span></label><input data-k="insurance" type="number"></div>
+          <div class="irow"><label>Marketing <span class="unit">$/mo</span></label><input data-k="marketing" type="number"></div>
+          <div class="irow"><label>Software / POS / booking <span class="unit">$/mo</span></label><input data-k="software" type="number"></div>
+          <div class="irow"><label>Repairs &amp; maintenance <span class="unit">$/mo</span></label><input data-k="maint" type="number"></div>
+          <div class="irow"><label>Admin / misc <span class="unit">$/mo</span></label><input data-k="admin" type="number"></div>
+        </details>
+
+        <details class="igroup">
+          <summary>🎯 Targets</summary>
+          <div class="irow"><label>Your startup budget <span class="unit">$</span></label><input data-k="budget" type="number"></div>
+        </details>
+      </div>
+
+      <!-- RESULTS -->
+      <div class="results">
+        <div class="kpis">
+          <div class="kpi"><div class="v" id="kStartup">—</div><div class="l">Total startup cost</div></div>
+          <div class="kpi"><div class="v" id="kRev">—</div><div class="l">Revenue / mo (mature)</div></div>
+          <div class="kpi"><div class="v" id="kProfit">—</div><div class="l">Operating profit / mo</div></div>
+          <div class="kpi"><div class="v" id="kMargin">—</div><div class="l">Operating margin</div></div>
+          <div class="kpi"><div class="v" id="kBreakeven">—</div><div class="l">Break-even members (incl. day passes)</div></div>
+          <div class="kpi"><div class="v" id="kBreakevenSub">—</div><div class="l">Break-even members (subs only, stress)</div></div>
+          <div class="kpi"><div class="v" id="kPayback">—</div><div class="l">Payback period</div></div>
+        </div>
+
+        <div class="alert" id="budgetAlert">—</div>
+
+        <div class="chartbox">
+          <h3>Monthly revenue mix</h3>
+          <div id="revChart" class="svgchart"></div>
+        </div>
+        <div class="chartbox">
+          <h3>Monthly cost structure</h3>
+          <div id="costChart" class="svgchart"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REVENUE, CAPACITY & RAMP -->
+<section id="ramp">
+  <div class="wrap">
+    <div class="eyebrow">06 · Revenue, Capacity &amp; Ramp</div>
+    <h2>Can the space hold it, and how fast do we get there?</h2>
+    <p class="lead">Two things make a revenue plan credible: the building can physically serve the visits you're counting on, and you survive the climb to maturity. Here's the capacity math and a month-by-month member ramp — including the cash cushion you need to bridge to break-even.</p>
+
+    <h3 style="margin-top:26px">Capacity sizing <span class="note">(~2,200 sq ft)</span></h3>
+    <div class="grid g4" style="margin-top:6px">
+      <div class="card"><div class="statlbl">Comfortable at once</div><div class="stat sm">~24 guests</div><p class="note">sauna ~8 · steam ~6 · tubs ~8 · lounge ~15, never all full</p></div>
+      <div class="card"><div class="statlbl">Open hours/day</div><div class="stat sm">15 hrs</div><p class="note">7am–10pm</p></div>
+      <div class="card"><div class="statlbl">Daily visit ceiling</div><div class="stat sm">~110</div><p class="note">at ~100-min visits &amp; realistic turnover</p></div>
+      <div class="card"><div class="statlbl">Planned avg/day</div><div class="stat sm" id="capUse">~99</div><p class="note">member visits + day passes</p></div>
+    </div>
+    <div class="alert ok" id="capAlert" style="margin-top:14px">—</div>
+
+    <h3 style="margin-top:28px">Member ramp to maturity</h3>
+    <div class="kpis" style="grid-template-columns:repeat(3,1fr);margin-top:6px">
+      <div class="kpi"><div class="v" id="kBEmonth">—</div><div class="l">Break-even month</div></div>
+      <div class="kpi"><div class="v bad" id="kCushion">—</div><div class="l">Ramp cash cushion needed</div></div>
+      <div class="kpi"><div class="v" id="kTotalCash">—</div><div class="l">Total cash to launch (startup + cushion)</div></div>
+    </div>
+    <div class="alert" id="cashAlert" style="margin-top:12px">—</div>
+    <div class="chartbox" style="margin-top:14px">
+      <h3>Members &amp; cumulative cash, month by month</h3>
+      <div id="rampChart" class="svgchart"></div>
+      <p class="note" style="margin-top:8px">Members climb from your presale base to maturity; the cash line dips below zero during the ramp (you're covering fixed costs before revenue catches up), then recovers. The lowest point is the cushion you must have on hand beyond buildout.</p>
+    </div>
+  </div>
+</section>
+
+<!-- STARTUP COST BREAKDOWN -->
+<section id="startup">
+  <div class="wrap">
+    <div class="eyebrow">07 · Startup Cost Breakdown</div>
+    <h2>The lean-launch plan: opening for ~$250k, self-funded</h2>
+    <p class="lead">No financing — so the plan is engineered to open within a ~$250k cash ceiling without it. Three decisions get there: keep the full 2,200 sq ft (protect the community feel), find a <b>wet-ready</b> space to slash buildout, and <b>phase</b> the steam room and temperate tub into Phase 1b. The table below reflects that lean-launch configuration.</p>
+    <div class="grid g2" style="margin-top:18px">
+      <div class="card">
+        <h3>Cost to open (lean launch)</h3>
+        <table class="mini" id="startupTable"></table>
+        <p class="note" style="margin-top:10px">Deferred to <b>Phase 1b</b> (funded from cash flow once members ramp): steam room ~$16k, temperate tub ~$9k.</p>
+      </div>
+      <div class="card">
+        <h3>The decisions behind the number</h3>
+        <ul class="clean">
+          <li><b>Wet-ready space is the big lever.</b> A former restaurant/gym/salon/laundromat with existing plumbing, drains &amp; ventilation drops buildout from ~$65 to ~$45/sq ft — about $44k. Tradeoff: you take what's available, so prioritize bones over address.</li>
+          <li><b>Phase the equipment.</b> Open with the core circuit (sauna + hot &amp; cold tubs) — a complete contrast experience — and add steam + temperate within year one. Defers ~$25k.</li>
+          <li><b>Founding-member presale.</b> ~60 members pre-sold before opening seeds cash and shrinks the ramp cushion. Push to 80 to create more margin.</li>
+          <li><b>Keep ~2,200 sq ft.</b> You chose to protect the lounge and full member ceiling rather than shrink — savings come from sourcing &amp; phasing instead.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note" style="margin-top:14px">A standard (not wet-ready) retail shell would push total cash to launch to ~$280k — over the ceiling. Wet-ready is what makes self-funding work.</p>
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section id="roadmap">
+  <div class="wrap">
+    <div class="eyebrow">08 · Roadmap</div>
+    <h2>From plan to open in 6–12 months</h2>
+    <div class="timeline" style="margin-top:18px">
+      <div class="tphase"><div class="when">Months 0–2 · Validate &amp; secure</div><b>Plan, budget &amp; site search</b><p>Finalize this model, set the budget ceiling, scout wet-ready spaces, line up financing options, and start a founding-member waitlist to test demand.</p></div>
+      <div class="tphase"><div class="when">Months 2–4 · Design &amp; permit</div><b>Lease, design &amp; approvals</b><p>Sign lease, finalize layout, order long-lead equipment, and pull plumbing/ventilation/building permits — the critical-path item for any wet space.</p></div>
+      <div class="tphase"><div class="when">Months 4–8 · Build</div><b>Buildout &amp; install</b><p>Construction, waterproofing, install the sauna, steam room &amp; tubs, build the lounge, brand the space, hire and train staff.</p></div>
+      <div class="tphase"><div class="when">Months 7–9 · Pre-open</div><b>Soft launch</b><p>Founding-member previews, refine flow and capacity, dial in operations, convert the waitlist to paying members.</p></div>
+      <div class="tphase"><div class="when">Month 9+ · Open &amp; grow</div><b>Public opening</b><p>Grand opening, build the membership base toward maturity, deepen the community, and gather data for the Phase 2 expansion case.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- RISKS -->
+<section id="risks">
+  <div class="wrap">
+    <div class="eyebrow">09 · Risks &amp; Open Questions</div>
+    <h2>What we still need to pin down</h2>
+    <div class="grid g2" style="margin-top:18px">
+      <div class="card">
+        <h3>Key risks</h3>
+        <ul class="clean">
+          <li><b>Capital vs. ambition.</b> Wet buildout likely exceeds the lean budget — needs a financing or scope decision.</li>
+          <li><b>Utilities &amp; water.</b> Now grounded locally (~$3.2k/mo electric+gas+water), but a wet facility's demand charges and water turnover can surprise — worth real quotes.</li>
+          <li><b>Capacity math.</b> Open social bathing must be capped for safety/comfort — caps the day-pass ceiling.</li>
+          <li><b>Permitting timeline.</b> Health/building approvals for wet facilities can slip the opening.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Open questions for our next session</h3>
+        <ul class="clean">
+          <li>Do you have a target space or neighborhood block in mind yet?</li>
+          <li>How will you bridge the ~$340k cash to launch vs. the ~$185k budget — savings, SBA loan, equipment financing, or a partner?</li>
+          <li>Can you run a founding-member presale before opening to seed both cash and demand?</li>
+          <li>Traditional (wood/electric) sauna, infrared, or a mix?</li>
+          <li>What's the off-peak window exactly (which days/hours qualify for the $99 tier)?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span class="draftmark">WORKING DRAFT</span>
+    <p style="margin-top:12px">The Bathhouse — interactive business plan · Vancouver, WA · Built section-by-section. Numbers are editable planning estimates, not financial advice. We'll keep refining this together.</p>
+  </div>
+</footer>
+
+<script>
+const DEFAULTS = {
+  sqft:2200, rentPsf:28,
+  buildPsf:45, saunaCost:14000, steamCost:0, hotCost:13000, coldCost:9000,
+  tempCost:0, ffe:22000, lounge:13000, permits:12000,
+  preopen:7000, contingency:18000,
+  dayPrice:38, dayPerDay:14, daysOpen:30,
+  peakPrice:139, peakQty:170, offPrice:99, offQty:100,
+  startMembers:70, rampMonths:12,
+  staffHrsWeek:150, wage:20, payrollLoad:15, ownerSalary:0,
+  elec:1200, gas:500, water:1300, laundry:1400, fnbCogs:2200, insurance:750,
+  marketing:1500, software:600, maint:1000, admin:1000,
+  budget:250000
+};
+const KEY='bathhouse_plan_v1';
+let state = load();
+
+function load(){
+  try{ const s=JSON.parse(localStorage.getItem(KEY)); if(s) return {...DEFAULTS,...s}; }catch(e){}
+  return {...DEFAULTS};
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+
+const $ = s=>document.querySelector(s);
+const fmt = n=> (n<0?'-':'')+'$'+Math.abs(Math.round(n)).toLocaleString();
+const fmt0 = n=> Math.round(n).toLocaleString();
+
+// bind inputs
+document.querySelectorAll('input[data-k]').forEach(inp=>{
+  const k=inp.dataset.k; inp.value=state[k];
+  inp.addEventListener('input',()=>{ const v=parseFloat(inp.value); state[k]=isNaN(v)?0:v; save(); compute(); });
+});
+
+let revChart, costChart, rampChart;
+
+function computeRamp(s, startup, memRevMat, dayRevMat, costs){
+  const mature = s.peakQty + s.offQty;
+  const visitsPerWeek = 2.2;
+  const memberVisitsDay = mature*visitsPerWeek/7;
+  const plannedPerDay = memberVisitsDay + s.dayPerDay;
+  const ceiling = 110;
+  $('#capUse').textContent = '~'+Math.round(plannedPerDay);
+  const ca=$('#capAlert');
+  if(plannedPerDay <= ceiling*0.85){
+    ca.className='alert ok';
+    ca.innerHTML = `✅ Planned <b>~${Math.round(plannedPerDay)} visits/day</b> sits comfortably under the ~${ceiling}/day ceiling — the space can hold this plan with headroom for peak evenings.`;
+  } else if(plannedPerDay <= ceiling){
+    ca.className='alert warn';
+    ca.innerHTML = `⚠️ Planned <b>~${Math.round(plannedPerDay)} visits/day</b> is close to the ~${ceiling}/day ceiling. Evenings may feel crowded — consider the off-peak tier or pricing to spread demand.`;
+  } else {
+    ca.className='alert warn';
+    ca.innerHTML = `⚠️ Planned <b>~${Math.round(plannedPerDay)} visits/day</b> exceeds the ~${ceiling}/day capacity. You'd need a bigger footprint, more sessions, or fewer members per the space.`;
+  }
+
+  const horizon = Math.max(Math.round(s.rampMonths)+6, 18);
+  const labels=[], memberSeries=[], cashSeries=[];
+  let cum=0, minCum=0, beMonth=null;
+  for(let m=1;m<=horizon;m++){
+    const frac = Math.min(1, m/Math.max(1,s.rampMonths));
+    const membersM = Math.min(mature, s.startMembers + (mature - s.startMembers)*frac);
+    const memFrac = mature>0 ? membersM/mature : 0;
+    const revM = memRevMat*memFrac + dayRevMat*(0.4+0.6*frac);
+    const netM = revM - costs;
+    cum += netM;
+    if(cum<minCum) minCum=cum;
+    if(beMonth===null && netM>=0) beMonth=m;
+    labels.push('M'+m); memberSeries.push(Math.round(membersM)); cashSeries.push(Math.round(cum));
+  }
+  const cushion = minCum<0 ? -minCum : 0;
+  const totalCash = startup + cushion;
+
+  $('#kBEmonth').textContent = beMonth? 'Month '+beMonth : '—';
+  $('#kCushion').textContent = fmt(cushion);
+  const tc=$('#kTotalCash'); tc.textContent = fmt(totalCash);
+  tc.className = 'v '+(totalCash<=s.budget?'good':'bad');
+  const ca2=$('#cashAlert');
+  const diff = totalCash - s.budget;
+  if(diff<=0){
+    ca2.className='alert ok';
+    ca2.innerHTML = `✅ Total cash to launch (<b>${fmt(totalCash)}</b>) fits within your <b>${fmt(s.budget)}</b> ceiling, with ${fmt(-diff)} to spare. Note: this excludes the deferred steam room &amp; temperate tub (~$25k, added in Phase 1b from cash flow).`;
+  }else{
+    ca2.className='alert warn';
+    ca2.innerHTML = `⚠️ Total cash to launch (<b>${fmt(totalCash)}</b>) is <b>${fmt(diff)} over</b> your ${fmt(s.budget)} ceiling. Lever it down: lower buildout $/sqft (wet-ready space), raise the founding-member presale, or defer more equipment.`;
+  }
+
+  lineChart('rampChart', labels, memberSeries, cashSeries);
+}
+
+function compute(){
+  const s=state;
+  // startup
+  const buildout = s.sqft*s.buildPsf;
+  const startupItems = {
+    'Leasehold buildout': buildout,
+    'Communal sauna': s.saunaCost,
+    'Steam room': s.steamCost,
+    'Hot tub': s.hotCost,
+    'Cold tub': s.coldCost,
+    'Temperate tub': s.tempCost,
+    'Lockers / showers / FF&E': s.ffe,
+    'Lounge & F&B build': s.lounge,
+    'Permits, design, fees': s.permits,
+    'Branding & pre-open marketing': s.preopen,
+    'Contingency / working capital': s.contingency
+  };
+  const startup = Object.values(startupItems).reduce((a,b)=>a+b,0);
+
+  // revenue
+  const dayRev = s.dayPrice*s.dayPerDay*s.daysOpen;
+  const peakRev = s.peakPrice*s.peakQty;
+  const offRev = s.offPrice*s.offQty;
+  const memRev = peakRev + offRev;
+  const revenue = dayRev + memRev;
+
+  // costs
+  const rent = s.sqft*s.rentPsf/12;
+  const payroll = s.staffHrsWeek*s.wage*52/12*(1+s.payrollLoad/100) + s.ownerSalary/12;
+  const costItems = {
+    'Rent': rent,
+    'Payroll & staffing': payroll,
+    'Electricity': s.elec,
+    'Natural gas': s.gas,
+    'Water / sewer / stormwater': s.water,
+    'Laundry, cleaning & supplies': s.laundry,
+    'Tea & snacks': s.fnbCogs,
+    'Insurance': s.insurance,
+    'Marketing': s.marketing,
+    'Software / POS': s.software,
+    'Repairs & maintenance': s.maint,
+    'Admin / misc': s.admin
+  };
+  const costs = Object.values(costItems).reduce((a,b)=>a+b,0);
+  const profit = revenue-costs;
+  const margin = revenue>0 ? profit/revenue*100 : 0;
+
+  // break-even in members
+  const totalMembers = s.peakQty + s.offQty;
+  const blendedPrice = totalMembers>0 ? memRev/totalMembers : 0;
+  const capMembers = 290; // approx ceiling members the space can serve
+  // realistic: day passes are running, so members only cover what's left
+  const beMembers = blendedPrice>0 ? Math.max(0,(costs - dayRev)/blendedPrice) : 0;
+  // stress test: subscriptions alone, zero day passes
+  const beMembersSubsOnly = blendedPrice>0 ? costs/blendedPrice : 0;
+
+  const payback = profit>0 ? startup/profit : Infinity;
+
+  // KPIs
+  $('#kStartup').textContent = fmt(startup);
+  $('#kRev').textContent = fmt(revenue);
+  const pe=$('#kProfit'); pe.textContent=fmt(profit); pe.className='v '+(profit>=0?'good':'bad');
+  $('#kMargin').textContent = margin.toFixed(1)+'%';
+  const be=$('#kBreakeven');
+  be.textContent = fmt0(beMembers)+' members';
+  be.className = 'v '+(beMembers<=capMembers?'good':'bad');
+  const beSub=$('#kBreakevenSub');
+  if(beSub){ beSub.textContent = fmt0(beMembersSubsOnly)+' members';
+    beSub.className='v '+(beMembersSubsOnly<=capMembers?'good':'bad'); }
+  const pb=$('#kPayback');
+  pb.textContent = payback===Infinity?'—':(payback/12).toFixed(1)+' yrs';
+  pb.className='v '+(payback!==Infinity && payback<=60?'good':'bad');
+
+  // budget alert
+  const a=$('#budgetAlert');
+  const over = startup - s.budget;
+  if(over>0){
+    a.className='alert warn';
+    a.innerHTML = `⚠️ Cost to open (<b>${fmt(startup)}</b>) is ${fmt(over)} over your ${fmt(s.budget)} ceiling — before the ramp cushion. Trim buildout $/sqft (wet-ready space) or defer more equipment.`;
+  }else{
+    a.className='alert ok';
+    a.innerHTML = `✅ Cost to open (<b>${fmt(startup)}</b>) fits your ${fmt(s.budget)} ceiling. The full picture — including the ramp cushion — is in the Capacity &amp; Ramp section below.`;
+  }
+
+  // startup table (skip deferred / $0 items)
+  const tbl=$('#startupTable');
+  tbl.innerHTML = Object.entries(startupItems).filter(([k,v])=>v>0).map(([k,v])=>`<tr><td>${k}</td><td>${fmt(v)}</td></tr>`).join('')
+    + `<tr><td>Total to open</td><td>${fmt(startup)}</td></tr>`;
+
+  // charts
+  drawCharts(
+    {'Day passes':dayRev,'Anytime members':peakRev,'Off-peak members':offRev},
+    costItems
+  );
+
+  // ----- member ramp + cash to break-even -----
+  computeRamp(s, startup, memRev, dayRev, costs);
+}
+
+const PAL=['#a8744f','#7f8c6e','#5b8fa3','#d99a5b','#c0613f','#b78a3e','#8a5d3d','#9aa888','#7aa6b8','#cf8a52','#9c6b4a','#6e7d5e','#bf8f6a','#84a0ad'];
+
+function drawCharts(rev, cost){
+  donut('revChart', rev);
+  donut('costChart', cost);
+}
+
+function donut(id, obj){
+  const entries=Object.entries(obj).filter(([k,v])=>v>0);
+  const total=entries.reduce((a,[,v])=>a+v,0);
+  const cx=85,cy=85,r=60,sw=34,C=2*Math.PI*r;
+  let off=0, segs='';
+  entries.forEach(([k,v],i)=>{
+    const frac=total>0?v/total:0;
+    const dash=frac*C;
+    segs+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${PAL[i%PAL.length]}" stroke-width="${sw}" `+
+          `stroke-dasharray="${dash.toFixed(2)} ${(C-dash).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 ${cx} ${cy})"/>`;
+    off+=dash;
+  });
+  const legend=entries.map(([k,v],i)=>{
+    const pct=total>0?Math.round(v/total*100):0;
+    return `<div class="li"><span class="sw" style="background:${PAL[i%PAL.length]}"></span>`+
+           `<span class="lname">${k}</span><span class="lval">${fmt(v)} · ${pct}%</span></div>`;
+  }).join('');
+  document.getElementById(id).innerHTML =
+    `<div class="donutwrap"><svg viewBox="0 0 170 170" aria-hidden="true">${segs}`+
+    `<text x="${cx}" y="${cy-3}" text-anchor="middle" font-size="11" fill="#7c7065">Total</text>`+
+    `<text x="${cx}" y="${cy+13}" text-anchor="middle" font-size="14" font-weight="700" fill="#2f2a24">${fmt(total)}</text>`+
+    `</svg><div class="legend">${legend}</div></div>`;
+}
+
+function lineChart(id, labels, members, cash){
+  const W=620,H=280,padL=46,padR=52,padT=16,padB=28;
+  const iw=W-padL-padR, ih=H-padT-padB;
+  const n=labels.length;
+  const xAt=i=> padL + (n<=1?0:(i/(n-1))*iw);
+  const memMax=Math.max(...members,1);
+  const cashMin=Math.min(0,...cash), cashMax=Math.max(0,...cash);
+  const cashRange=(cashMax-cashMin)||1;
+  const yMem=v=> padT + ih - (v/memMax)*ih;
+  const yCash=v=> padT + ih - ((v-cashMin)/cashRange)*ih;
+  const memPts=members.map((v,i)=>`${xAt(i).toFixed(1)},${yMem(v).toFixed(1)}`).join(' ');
+  const cashPts=cash.map((v,i)=>`${xAt(i).toFixed(1)},${yCash(v).toFixed(1)}`).join(' ');
+  const zeroY=yCash(0);
+  // gridlines / labels
+  let grid='';
+  for(let g=0;g<=4;g++){ const y=padT+ (g/4)*ih; grid+=`<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W-padR}" y2="${y.toFixed(1)}" stroke="#eee6d9"/>`; }
+  // x labels (every ~3rd)
+  let xl='';
+  labels.forEach((lb,i)=>{ if(i% Math.ceil(n/8)===0 || i===n-1){ xl+=`<text x="${xAt(i).toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="9" fill="#7c7065">${lb}</text>`; }});
+  // y axis labels (members left, cash right)
+  let yl='';
+  for(let g=0;g<=4;g++){ const frac=g/4; const memV=Math.round(memMax*frac); const cashV=cashMin+cashRange*frac;
+    const y=padT+ih-(frac*ih);
+    yl+=`<text x="${padL-6}" y="${(y+3).toFixed(1)}" text-anchor="end" font-size="9" fill="#a8744f">${memV}</text>`;
+    yl+=`<text x="${W-padR+6}" y="${(y+3).toFixed(1)}" text-anchor="start" font-size="9" fill="#5b8fa3">$${Math.round(cashV/1000)}k</text>`;
+  }
+  const zeroLine = (cashMin<0) ? `<line x1="${padL}" y1="${zeroY.toFixed(1)}" x2="${W-padR}" y2="${zeroY.toFixed(1)}" stroke="#c9bba9" stroke-dasharray="3 3"/>` : '';
+  document.getElementById(id).innerHTML =
+    `<svg viewBox="0 0 ${W} ${H}">${grid}${zeroLine}`+
+    `<polyline points="${cashPts}" fill="none" stroke="#5b8fa3" stroke-width="2.5"/>`+
+    `<polyline points="${memPts}" fill="none" stroke="#a8744f" stroke-width="2.5"/>`+
+    `${yl}${xl}</svg>`+
+    `<div class="legend" style="flex-direction:row;gap:18px;margin-top:6px">`+
+    `<span class="li"><span class="sw" style="background:#a8744f"></span><span class="lname">Members</span></span>`+
+    `<span class="li"><span class="sw" style="background:#5b8fa3"></span><span class="lname">Cumulative cash</span></span></div>`;
+}
+
+$('#resetBtn').addEventListener('click',()=>{
+  state={...DEFAULTS}; save();
+  document.querySelectorAll('input[data-k]').forEach(inp=>inp.value=state[inp.dataset.k]);
+  compute();
+});
+
+compute();
+</script>
+</body>
+</html>
